@@ -1,13 +1,15 @@
 ---
 
-   - name: creer les chaines de commmande permettant de convertir les fichiers wav en json
-     set_fact: audiotofeatures="{{ root_dir }}/bin/audiotofeatures.py  {{ rec_wav_directory }}/XC-{{ recID }}-mono.wav {{ rec_json_directory }}/XC-{{ recID }}.json"
-
    - name: check if json file exists
      stat: 
        path: "{{ rec_json_directory }}/XC-{{ recID }}.json"
        get_checksum: no
      register: json_file
+
+   - name: creer les chaines de commmande permettant de convertir les fichiers wav en json
+     set_fact: audiotofeatures="{{ root_dir }}/bin/audiotofeatures.py  {{ rec_wav_directory }}/XC-{{ recID }}-mono.wav {{ rec_json_directory }}/XC-{{ recID }}.json"
+     when: json_file.stat.exists == false
+
 
    - name: convertir le ficheir wav en json   
      command: "{{ audiotofeatures }}"

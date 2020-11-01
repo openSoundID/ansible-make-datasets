@@ -22,6 +22,7 @@
   template:
     src: audiotofeatures.py.j2
     dest: "{{ root_dir }}/bin/audiotofeatures.py"
+    mode: u=rwx,g=r,o=r
   
 - include_tasks: ForEachBird.yml 
   with_items: 
