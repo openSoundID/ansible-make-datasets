@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+
+import essentia
+import essentia.standard
+import sys
+from essentia.standard import *
+
+inputfilename=sys.argv[1]
+outputfilename=sys.argv[2]
+
+loader = essentia.standard.MonoLoader(filename=inputfilename)
+
+# and then we actually perform the loading:
+audio = loader()
+
+
+w = Windowing(type = '{{ essentia_windowtype }}')
+spectrum = Spectrum(size={{ essentia_spectrumsize }})
+mfcc = MFCC(lowFrequencyBound={{ essentia_lowfrequencybound }},highFrequencyBound={{ essentia_highfrequencybound }},sampleRate={{ essentia_samplerate }},normalize='{{ essentia_mfcc_normalize }}',warpingFormula='{{ essentia_mfcc_warpingFormula }}',weighting='{{ essentia_mfcc_weighting }}')
+energy = Energy()
+zerocrossingrate = ZeroCrossingRate(threshold={{ essentia_zerocrossingrate_threshold }})
+envelope = Envelope(attackTime={{ essentia_envelope_attackTime }},releaseTime={{ essentia_envelope_releaseTime }},sampleRate={{ essentia_samplerate }})
+
+logNorm = UnaryOperator(type='{{ essentia_logNorm_type }}')
+
+#############################
+mfccs = []
+melbands = []
+melbands_log = []
+
+pool = essentia.Pool()
+zcr = zerocrossingrate(audio)
+envelop=envelope(audio)
+pool.add('description.zero_crossing_rate', zcr)
+pool.add('description.envelope', envelop)
+
+for frame in FrameGenerator(audio, frameSize = {{ essentia_framesize }}, hopSize = {{ essentia_hopsize }}, startFromZero=True):
+    mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
+    frame_energy = energy(w(frame))
+    pool.add('lowlevel.mfcc_bands_log', logNorm(mfcc_bands))
+    pool.add('lowlevel.energy', frame_energy)
+
+output = YamlOutput(filename = outputfilename,format = 'json') 
+output(pool)
+
+

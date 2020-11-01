@@ -1,0 +1,20 @@
+---
+
+   - name: Record the vars
+     set_fact: 
+         birdID: "{{ bird.birdID }}"
+ 
+   
+   - include_tasks: ForEachRecMP3TOWAV.yml
+     with_items: 
+       - "{{ bird.recID }}"
+     loop_control:
+       loop_var: recID
+
+   - include_tasks: ForEachRecWAVTOJSON.yml
+     with_items: 
+       - "{{ bird.recID }}"
+     loop_control:
+       loop_var: recID
+
+

@@ -1,0 +1,57 @@
+---
+
+   - name: Download record wav files from xeno-canto
+     get_url:
+       url: https://www.xeno-canto.org/{{ recID }}/download
+       dest: "{{ rec_download_directory }}/XC-{{ recID }}.mp3"
+       timeout: 60
+
+   - name: check if wav file exists
+     stat: 
+       path: "{{ rec_wav_directory }}/XC-{{ recID }}-mono.wav"
+       get_checksum: no
+     register: mono_wav_file
+
+   - name: Create temporary directory
+     tempfile:
+       state: directory
+       suffix: dataset
+     register: temp_dataset_directory
+     when: mono_wav_file.stat.exists == false
+
+   - name: creer les chaines de commmande permettant de convertir mp3 en wav
+     set_fact: sox_wav_to_monowav="sox -R \"{{ rec_download_directory }}/XC-{{ recID }}.mp3\"  -r {{ sox_rate }} -c 1 -b {{ sox_bitsnumber }} \"{{ temp_dataset_directory.path }}/XC-{{ recID }}-monotmp.wav\" highpass {{ sox_high_pass }} norm {{ sox_norm_db }}"
+               monowav_to_profile="/usr/bin/sox -R \"{{ temp_dataset_directory.path }}/XC-{{ recID }}-monotmp.wav\" -n noiseprof {{ temp_dataset_directory.path }}/noise_balbucam_file"
+               denoise="/usr/bin/sox -R \"{{ temp_dataset_directory.path }}/XC-{{ recID }}-monotmp.wav\" \"{{ temp_dataset_directory.path }}/XC-{{ recID }}-monotmp2.wav\" noisered {{ temp_dataset_directory.path }}/noise_balbucam_file {{ sox_denoise_level }}"
+               noise_wav="/usr/bin/ffmpeg -i \"{{ temp_dataset_directory.path }}/XC-{{ recID }}-monotmp2.wav\" -filter_complex \"amovie={{ ffmpeg_noise_wav_file }}:loop={{ ffmpeg_noise_loop }}[s];[s]volume={{ ffmpeg_noise_volume }}[s1];[0][s1]amix=duration=shortest\" \"{{ rec_wav_directory }}/XC-{{ recID }}-mono.wav\""
+     when: mono_wav_file.stat.exists == false
+
+   - name: convert MP3 to wav   
+     shell: "{{ sox_wav_to_monowav }}"
+     register: sox_wav_to_monowav
+     when: mono_wav_file.stat.exists == false
+  
+   - name: generate noise profile   
+     shell: "{{ monowav_to_profile }}"
+     register: monowav_to_profile
+     when: mono_wav_file.stat.exists == false
+
+   - name: remove noise    
+     shell: "{{ denoise }}"
+     register: denoise
+     when: mono_wav_file.stat.exists == false
+
+   - name: generate microphone noise in the file   
+     shell: "{{ noise_wav }}"
+     register: noise_wav
+     when: mono_wav_file.stat.exists == false
+ 
+   - name: delete temporary file
+     file: 
+       path: "{{ temp_dataset_directory.path }}"
+       state: absent
+     when: mono_wav_file.stat.exists == false
+     async: 240
+     poll: 0
+
+

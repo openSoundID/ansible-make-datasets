@@ -1,0 +1,14 @@
+---
+- hosts: localhost 
+  gather_facts: no
+
+  vars:
+   rec_download_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_download_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
+   rec_wav_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_wav_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
+   rec_json_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_json_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
+   inventory: "{{ lookup('ini', 'inventory.testInventoryFile type=properties file={{ root_dir }}/properties/engine.properties') }}"
+
+  roles:
+   - { role: make-datasets, become: no }
+
+
