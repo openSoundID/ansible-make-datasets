@@ -15,6 +15,7 @@ essentia_lowfrequencybound: "{{ lookup('ini', 'ansible.essentia.lowfrequencyboun
 essentia_highfrequencybound: "{{ lookup('ini', 'ansible.essentia.highfrequencybound type=properties file={{ root_dir }}/properties/engine.properties') }}"
 essentia_framesize: "{{ lookup('ini', 'ansible.essentia.framesize type=properties file={{ root_dir }}/properties/engine.properties') }}"
 essentia_hopsize: "{{ lookup('ini', 'ansible.essentia.hopsize type=properties file={{ root_dir }}/properties/engine.properties') }}"
+essentia_mfcc_numberbands: "{{ lookup('ini', 'ansible.essentia.mfcc.numberbands type=properties file={{ root_dir }}/properties/engine.properties') }}"
 essentia_samplerate: "{{ lookup('ini', 'ansible.essentia.samplerate type=properties file={{ root_dir }}/properties/engine.properties') }}"
 essentia_mfcc_normalize: "{{ lookup('ini', 'ansible.essentia.mfcc.normalize type=properties file={{ root_dir }}/properties/engine.properties') }}"
 essentia_mfcc_warpingFormula: "{{ lookup('ini', 'ansible.essentia.mfcc.warpingFormula type=properties file={{ root_dir }}/properties/engine.properties') }}"

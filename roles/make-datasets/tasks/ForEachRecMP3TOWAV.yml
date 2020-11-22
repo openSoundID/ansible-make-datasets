@@ -1,16 +1,17 @@
 ---
 
-   - name: Download record wav files from xeno-canto
-     get_url:
-       url: https://www.xeno-canto.org/{{ recID }}/download
-       dest: "{{ rec_download_directory }}/XC-{{ recID }}.mp3"
-       timeout: 60
-
    - name: check if wav file exists
      stat: 
        path: "{{ rec_wav_directory }}/XC-{{ recID }}-mono.wav"
        get_checksum: no
      register: mono_wav_file
+
+   - name: Download record wav files from xeno-canto
+     get_url:
+       url: https://www.xeno-canto.org/{{ recID }}/download
+       dest: "{{ rec_download_directory }}/XC-{{ recID }}.mp3"
+       timeout: 60
+     when: mono_wav_file.stat.exists == false
 
    - name: Create temporary directory
      tempfile:

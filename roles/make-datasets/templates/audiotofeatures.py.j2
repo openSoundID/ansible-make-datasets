@@ -5,18 +5,19 @@ import essentia.standard
 import sys
 from essentia.standard import *
 
+#############################
+
 inputfilename=sys.argv[1]
 outputfilename=sys.argv[2]
 
-loader = essentia.standard.MonoLoader(filename=inputfilename)
-
-# and then we actually perform the loading:
-audio = loader()
+#############################
 
 
+loader = MonoLoader(filename=inputfilename,sampleRate={{ essentia_samplerate }})
 w = Windowing(type = '{{ essentia_windowtype }}')
 spectrum = Spectrum(size={{ essentia_spectrumsize }})
-mfcc = MFCC(lowFrequencyBound={{ essentia_lowfrequencybound }},highFrequencyBound={{ essentia_highfrequencybound }},sampleRate={{ essentia_samplerate }},normalize='{{ essentia_mfcc_normalize }}',warpingFormula='{{ essentia_mfcc_warpingFormula }}',weighting='{{ essentia_mfcc_weighting }}')
+pool = essentia.Pool()
+mfcc = MFCC(lowFrequencyBound={{ essentia_lowfrequencybound }},highFrequencyBound={{ essentia_highfrequencybound }},sampleRate={{ essentia_samplerate }},numberBands={{ essentia_mfcc_numberbands }},normalize='{{ essentia_mfcc_normalize }}',warpingFormula='{{ essentia_mfcc_warpingFormula }}',weighting='{{ essentia_mfcc_weighting }}')
 energy = Energy()
 zerocrossingrate = ZeroCrossingRate(threshold={{ essentia_zerocrossingrate_threshold }})
 envelope = Envelope(attackTime={{ essentia_envelope_attackTime }},releaseTime={{ essentia_envelope_releaseTime }},sampleRate={{ essentia_samplerate }})
@@ -24,11 +25,12 @@ envelope = Envelope(attackTime={{ essentia_envelope_attackTime }},releaseTime={{
 logNorm = UnaryOperator(type='{{ essentia_logNorm_type }}')
 
 #############################
+
 mfccs = []
 melbands = []
 melbands_log = []
+audio = loader()
 
-pool = essentia.Pool()
 zcr = zerocrossingrate(audio)
 envelop=envelope(audio)
 pool.add('description.zero_crossing_rate', zcr)
