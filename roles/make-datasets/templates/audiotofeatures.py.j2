@@ -13,7 +13,7 @@ outputfilename=sys.argv[2]
 #############################
 
 
-loader = MonoLoader(filename=inputfilename,sampleRate={{ essentia_samplerate }})
+loader = MonoLoader(filename=inputfilename)
 w = Windowing(type = '{{ essentia_windowtype }}')
 spectrum = Spectrum(size={{ essentia_spectrumsize }})
 pool = essentia.Pool()
@@ -21,6 +21,7 @@ mfcc = MFCC(lowFrequencyBound={{ essentia_lowfrequencybound }},highFrequencyBoun
 energy = Energy()
 zerocrossingrate = ZeroCrossingRate(threshold={{ essentia_zerocrossingrate_threshold }})
 envelope = Envelope(attackTime={{ essentia_envelope_attackTime }},releaseTime={{ essentia_envelope_releaseTime }},sampleRate={{ essentia_samplerate }})
+flatness = FlatnessSFX()
 
 logNorm = UnaryOperator(type='{{ essentia_logNorm_type }}')
 
@@ -32,9 +33,12 @@ melbands_log = []
 audio = loader()
 
 zcr = zerocrossingrate(audio)
-envelop=envelope(audio)
+signal_envelope=envelope(audio)
+signal_flatness=flatness(signal_envelope)
+
 pool.add('description.zero_crossing_rate', zcr)
-pool.add('description.envelope', envelop)
+pool.add('description.envelope', signal_envelope)
+pool.add('description.flatness', signal_flatness)
 
 for frame in FrameGenerator(audio, frameSize = {{ essentia_framesize }}, hopSize = {{ essentia_hopsize }}, startFromZero=True):
     mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))

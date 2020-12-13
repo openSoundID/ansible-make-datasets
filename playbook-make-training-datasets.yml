@@ -4,6 +4,7 @@
 
   vars:
    
+   noise_src_directory: "{{ lookup('ini', 'noiseRecords.recordsDirectory type=properties file={{ root_dir }}/properties/engine.properties') }}"
    rec_download_directory: "{{ lookup('ini', 'ansible.rec_download_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
    rec_wav_directory: "{{ lookup('ini', 'ansible.rec_wav_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
    rec_json_directory: "{{ lookup('ini', 'ansible.rec_json_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
