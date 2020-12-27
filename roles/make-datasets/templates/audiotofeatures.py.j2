@@ -3,6 +3,7 @@
 import essentia
 import essentia.standard
 import sys
+import numpy as np
 from essentia.standard import *
 
 #############################
@@ -13,15 +14,14 @@ outputfilename=sys.argv[2]
 #############################
 
 
-loader = MonoLoader(filename=inputfilename)
+loader = MonoLoader(filename=inputfilename,sampleRate={{ essentia_samplerate }},downmix='left')
 w = Windowing(type = '{{ essentia_windowtype }}')
 spectrum = Spectrum(size={{ essentia_spectrumsize }})
 pool = essentia.Pool()
 mfcc = MFCC(lowFrequencyBound={{ essentia_lowfrequencybound }},highFrequencyBound={{ essentia_highfrequencybound }},sampleRate={{ essentia_samplerate }},numberBands={{ essentia_mfcc_numberbands }},normalize='{{ essentia_mfcc_normalize }}',warpingFormula='{{ essentia_mfcc_warpingFormula }}',weighting='{{ essentia_mfcc_weighting }}')
 energy = Energy()
-zerocrossingrate = ZeroCrossingRate(threshold={{ essentia_zerocrossingrate_threshold }})
 envelope = Envelope(attackTime={{ essentia_envelope_attackTime }},releaseTime={{ essentia_envelope_releaseTime }},sampleRate={{ essentia_samplerate }})
-flatness = FlatnessSFX()
+
 
 logNorm = UnaryOperator(type='{{ essentia_logNorm_type }}')
 
@@ -30,17 +30,26 @@ logNorm = UnaryOperator(type='{{ essentia_logNorm_type }}')
 mfccs = []
 melbands = []
 melbands_log = []
+averegedEnvelope = []
+count=0.0
 audio = loader()
 
-zcr = zerocrossingrate(audio)
+
 signal_envelope=envelope(audio)
-signal_flatness=flatness(signal_envelope)
 
-pool.add('description.zero_crossing_rate', zcr)
-pool.add('description.envelope', signal_envelope)
-pool.add('description.flatness', signal_flatness)
 
-for frame in FrameGenerator(audio, frameSize = {{ essentia_framesize }}, hopSize = {{ essentia_hopsize }}, startFromZero=True):
+for frame in FrameGenerator(signal_envelope, frameSize = {{ essentia_envelope_hopsize }}, hopSize = {{ essentia_envelope_hopsize }}, startFromZero=True,validFrameThresholdRatio=1):
+    averegedEnvelope.append(np.percentile(frame,95.0))
+
+envelope_threshold = np.percentile(averegedEnvelope, {{ essentia_averagedenvelope_percentile }})
+
+peakdetect = PeakDetection(maxPeaks={{ essentia_PeakDetection_maxPeaks }},threshold=envelope_threshold+{{ essentia_PeakDetection_threshold }},minPeakDistance={{ essentia_hopsize }}*{{ essentia_PeakDetection_maxAggSize }},range=len(audio),minPosition={{ essentia_hopsize }}*{{ essentia_PeakDetection_minPosition }},maxPosition=len(audio)-{{ essentia_hopsize }}*{{ essentia_PeakDetection_maxPosition }} )
+positions,amplitudes = peakdetect(audio)
+
+pool.add('description.peakdetect_positions', positions)
+pool.add('description.peakdetect_amplitudes', amplitudes)
+
+for frame in FrameGenerator(audio, frameSize = {{ essentia_framesize }}, hopSize = {{ essentia_hopsize }}, startFromZero=True,validFrameThresholdRatio=1):
     mfcc_bands, mfcc_coeffs = mfcc(spectrum(w(frame)))
     frame_energy = energy(w(frame))
     pool.add('lowlevel.mfcc_bands_log', logNorm(mfcc_bands))

@@ -14,7 +14,7 @@
 
    - name: Download record MP3 files from xeno-canto for XC Record
      get_url:
-       url: https://www.xeno-canto.org/{{ recID }}/download
+       url: https://www.xeno-canto.org/{{ recID | regex_replace("XC-","")  }}/download
        dest: "{{ rec_download_directory }}/{{ recID }}.mp3"
        timeout: 60
      when: "mp3_file.stat.exists == false and recID.split('-')[0] == 'XC'"
