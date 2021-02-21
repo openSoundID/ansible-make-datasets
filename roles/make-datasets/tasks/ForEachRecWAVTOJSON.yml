@@ -15,7 +15,7 @@
      command: "{{ audiotofeatures }}"
      register: audiotofeatures
      when: json_file.stat.exists == false
-     async: 240
+     async: 1000
      poll: 0
 
  

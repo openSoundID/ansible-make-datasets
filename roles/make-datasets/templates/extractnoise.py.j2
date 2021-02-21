@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+import essentia
+import essentia.standard
+import sys
+import numpy as np
+import scipy.stats as stats
+from essentia.standard import *
+
+#############################
+
+inputfilename=sys.argv[1]
+outputfilename=sys.argv[2]
+
+#############################
+
+
+loader = MonoLoader(filename=inputfilename,sampleRate={{ essentia_samplerate }},downmix='left')
+envelope = Envelope(attackTime={{ essentia_envelope_attackTime }},releaseTime={{ essentia_envelope_releaseTime }},sampleRate={{ essentia_samplerate }})
+
+#############################
+
+
+audio = loader()
+positions = []
+amplitudes = []
+averegedEnvelope = []
+
+signal_envelope=envelope(audio)
+
+
+for frame in FrameGenerator(signal_envelope, frameSize = {{ essentia_envelope_hopsize }}, hopSize = {{ essentia_envelope_hopsize }}, startFromZero=True,validFrameThresholdRatio=1):
+    averegedEnvelope.append(np.percentile(frame,95.0))
+
+envelope_threshold = np.percentile(averegedEnvelope, {{ essentia_averagedenvelope_percentile }})
+
+minPosition={{ essentia_hopsize }}*{{ essentia_PeakDetection_minPosition }}
+maxPosition=len(audio)-{{ essentia_hopsize }}*{{ essentia_PeakDetection_maxPosition }}
+if (minPosition<maxPosition):
+    peakdetect = PeakDetection(maxPeaks={{ essentia_PeakDetection_maxPeaks }},threshold=envelope_threshold+{{ essentia_PeakDetection_threshold }},minPeakDistance={{ essentia_hopsize }}*({{ essentia_PeakDetection_maxAggSize }}/2),range=len(audio),minPosition=minPosition,maxPosition=maxPosition )
+    positions,amplitudes = peakdetect(audio)
+
+maxDistance=0
+maxPosition=0
+lastPosition=512*20
+
+for position in positions:
+    if(maxDistance<(position-lastPosition)):
+        maxDistance=position-lastPosition
+        maxPosition=lastPosition
+    lastPosition=position
+writer = MonoWriter(sampleRate={{ essentia_samplerate }},filename=outputfilename)
+writer(audio[int(maxPosition+maxDistance/2-{{ essentia_samplerate }}):int(maxPosition+maxDistance/2+{{ essentia_samplerate }})])

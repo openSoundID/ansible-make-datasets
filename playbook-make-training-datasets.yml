@@ -4,11 +4,11 @@
 
   vars:
    
-   noise_src_directory: "{{ lookup('ini', 'noiseRecords.recordsDirectory type=properties file={{ root_dir }}/properties/engine.properties') }}"
-   rec_download_directory: "{{ lookup('ini', 'ansible.rec_download_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
-   rec_wav_directory: "{{ lookup('ini', 'ansible.rec_wav_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
-   rec_json_directory: "{{ lookup('ini', 'ansible.rec_json_directory type=properties file={{ root_dir }}/properties/engine.properties') }}"
-   inventory: "{{ lookup('ini', 'inventory.trainingInventoryFile type=properties file={{ root_dir }}/properties/engine.properties') }}"
+   noise_src_directory: "{{ lookup('ini', 'noiseRecords.recordsDirectory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
+   rec_download_directory: "{{ lookup('ini', 'ansible.rec_download_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
+   rec_wav_directory: "{{ lookup('ini', 'ansible.rec_wav_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
+   rec_json_directory: "{{ lookup('ini', 'ansible.rec_json_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
+   inventory: "{{ lookup('ini', 'inventory.trainingInventoryFile type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
   
   roles:
    - { role: make-datasets, become: no }

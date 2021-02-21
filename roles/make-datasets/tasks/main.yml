@@ -23,6 +23,12 @@
     src: audiotofeatures.py.j2
     dest: "{{ root_dir }}/bin/audiotofeatures.py"
     mode: u=rwx,g=r,o=r
+
+- name: Template the python file for extract noise 
+  template:
+    src: extractnoise.py.j2
+    dest: "{{ root_dir }}/bin/extractnoise.py"
+    mode: u=rwx,g=r,o=r
   
 - include_tasks: ForEachBird.yml 
   with_items: 

@@ -34,7 +34,8 @@
 
    - name: creer les chaines de commmande permettant de convertir mp3 en wav
      set_fact: sox_wav_to_monowav="sox -R \"{{ rec_download_directory }}/{{ recID }}.mp3\"  -r {{ sox_rate }} -c 1 -b {{ sox_bitsnumber }} \"{{ temp_dataset_directory.path }}/{{ recID }}-monotmp.wav\" highpass {{ sox_high_pass }} norm {{ sox_norm_db }}"
-               monowav_to_profile="/usr/bin/sox -R \"{{ temp_dataset_directory.path }}/{{ recID }}-monotmp.wav\" -n noiseprof {{ temp_dataset_directory.path }}/noise_balbucam_file"
+               extract_noise_from_wav="{{ root_dir }}/bin/extractnoise.py {{ temp_dataset_directory.path }}/{{ recID }}-monotmp.wav {{ temp_dataset_directory.path }}/{{ recID }}-noise.wav"
+               monowav_to_profile="/usr/bin/sox -R \"{{ temp_dataset_directory.path }}/{{ recID }}-noise.wav\" -n noiseprof {{ temp_dataset_directory.path }}/noise_balbucam_file"
                denoise="/usr/bin/sox -R \"{{ temp_dataset_directory.path }}/{{ recID }}-monotmp.wav\" \"{{ temp_dataset_directory.path }}/{{ recID }}-monotmp2.wav\" noisered {{ temp_dataset_directory.path }}/noise_balbucam_file {{ sox_denoise_level }}"
                noise_wav="/usr/bin/ffmpeg -i \"{{ temp_dataset_directory.path }}/{{ recID }}-monotmp2.wav\" -filter_complex \"amovie={{ ffmpeg_noise_wav_file }}:loop={{ ffmpeg_noise_loop }}[s];[s]volume={{ ffmpeg_noise_volume }}[s1];[0][s1]amix=duration=shortest\" \"{{ rec_wav_directory }}/{{ recID }}-mono.wav\""
      when: mono_wav_file.stat.exists == false
@@ -43,6 +44,25 @@
      shell: "{{ sox_wav_to_monowav }}"
      register: sox_wav_to_monowav
      when: mono_wav_file.stat.exists == false
+
+   - name: extract noise from wav file
+     shell: "{{ extract_noise_from_wav }}"
+     when: mono_wav_file.stat.exists == false
+
+   - name: check if noise exist
+     stat:
+       path: "{{ temp_dataset_directory.path }}/{{ recID }}-noise.wav"
+       get_checksum: no
+     register: noise_wav_file
+     when: mono_wav_file.stat.exists == false
+
+   - name: copy if noise not generated
+     copy:
+       src: "{{ temp_dataset_directory.path }}/{{ recID }}-monotmp.wav"
+       dest: "{{ temp_dataset_directory.path }}/{{ recID }}-noise.wav" 
+       remote_src: yes
+     register: copy_noise_wav_file
+     when: mono_wav_file.stat.exists == false and noise_wav_file.stat.exists == false
   
    - name: generate noise profile   
      shell: "{{ monowav_to_profile }}"
@@ -52,7 +72,7 @@
    - name: remove noise    
      shell: "{{ denoise }}"
      register: denoise
-     when: mono_wav_file.stat.exists == false
+     when: mono_wav_file.stat.exists == false 
 
    - name: generate microphone noise in the file   
      shell: "{{ noise_wav }}"
