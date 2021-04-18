@@ -57,10 +57,10 @@ pool.add('description.peakdetect_positions', positions)
 pool.add('description.peakdetect_amplitudes', amplitudes)
 
 for position in positions:
-    startTime=(position/{{ essentia_hopsize }}-{{ essentia_PeakDetection_maxAggSize }}/2-5)*{{ essentia_hopsize }}/{{ essentia_samplerate }}
+    startTime=(position/{{ essentia_hopsize }}-{{ essentia_PeakDetection_maxAggSize }}/2-essentia_PeakDetection_deltaOptimizePeakIndice)*{{ essentia_hopsize }}/{{ essentia_samplerate }}
     if startTime < 0:
         startTime=0
-    endTime=(position/{{ essentia_hopsize }}+1+{{ essentia_PeakDetection_maxAggSize }}/2+5)*{{ essentia_hopsize }}/{{ essentia_samplerate }}
+    endTime=(position/{{ essentia_hopsize }}+1+{{ essentia_PeakDetection_maxAggSize }}/2+essentia_PeakDetection_deltaOptimizePeakIndice)*{{ essentia_hopsize }}/{{ essentia_samplerate }}
     if endTime > len(audio)-1:
         endTime=len(audio)-1     
     easyloader = EasyLoader(filename=inputfilename,sampleRate={{ essentia_samplerate }},downmix='mix',replayGain=-6,startTime=startTime, endTime=endTime)

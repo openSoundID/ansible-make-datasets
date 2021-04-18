@@ -31,4 +31,4 @@ essentia_PeakDetection_threshold: "{{ lookup('ini', 'ansible.essentia.PeakDetect
 essentia_PeakDetection_maxAggSize: "{{ lookup('ini', 'ansible.essentia.PeakDetection.maxAggSize type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
 essentia_PeakDetection_minPosition: "{{ lookup('ini', 'ansible.essentia.PeakDetection.minPosition type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
 essentia_PeakDetection_maxPosition: "{{ lookup('ini', 'ansible.essentia.PeakDetection.maxPosition type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
-
+essentia_PeakDetection_deltaOptimizePeakIndice: "{{ lookup('ini', 'ansible.essentia.PeakDetection.deltaOptimizePeakIndice type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
