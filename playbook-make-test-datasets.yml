@@ -6,6 +6,7 @@
    rec_download_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_download_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
    rec_wav_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_wav_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
    rec_json_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_json_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
+   rec_label_directory: "{{ lookup('ini', 'ansible.alsodataset_rec_label_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
    inventory: "{{ lookup('ini', 'inventory.testInventoryFile type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
 
   roles:

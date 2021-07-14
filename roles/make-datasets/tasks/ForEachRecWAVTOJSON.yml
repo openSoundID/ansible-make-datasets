@@ -7,9 +7,8 @@
      register: json_file
 
    - name: creer les chaines de commmande permettant de convertir les fichiers wav en json
-     set_fact: audiotofeatures="{{ root_dir }}/bin/audiotofeatures.py  {{ rec_wav_directory }}/{{ recID }}-mono.wav {{ rec_json_directory }}/{{ recID }}.json"
+     set_fact: audiotofeatures="{{ root_dir }}/bin/audiotofeatures.py  {{ rec_wav_directory }}/{{ recID }}-mono.wav {{ rec_json_directory }}/{{ recID }}.json {{ rec_label_directory }}/{{ recID }}.csv"
      when: json_file.stat.exists == false
-
 
    - name: convertir le ficheir wav en json   
      command: "{{ audiotofeatures }}"

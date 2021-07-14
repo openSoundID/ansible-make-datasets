@@ -2,16 +2,20 @@
 
 import essentia
 import essentia.standard
+import csv
 import sys
 import numpy as np
 import scipy.stats as stats
 from essentia.standard import *
+from pathlib import Path
 
 #############################
 
 inputfilename=sys.argv[1]
 outputfilename=sys.argv[2]
-
+labelfilename = ""
+if len(sys.argv) >3:
+   labelfilename=sys.argv[3]
 #############################
 
 
@@ -37,8 +41,8 @@ audio = loader()
 chunckID = 0
 positions = []
 amplitudes = []
-
-
+corrected_positions = []
+corrected_amplitudes = []
 
 signal_envelope=envelope(audio)
 
@@ -52,6 +56,25 @@ maxPosition=len(audio)-{{ essentia_hopsize }}*{{ essentia_PeakDetection_maxPosit
 if (minPosition<maxPosition):
     peakdetect = PeakDetection(maxPeaks={{ essentia_PeakDetection_maxPeaks }},threshold=envelope_threshold+{{ essentia_PeakDetection_threshold }},minPeakDistance={{ essentia_hopsize }}*({{ essentia_PeakDetection_maxAggSize }}/2),range=len(audio),minPosition={{ essentia_hopsize }}*{{ essentia_PeakDetection_minPosition }},maxPosition=len(audio)-{{ essentia_hopsize }}*{{ essentia_PeakDetection_maxPosition }} )
     positions,amplitudes = peakdetect(audio)
+
+#consideration of labels
+labels_file = Path(labelfilename)
+if labels_file.is_file():
+    indice_positions=0
+    indice_corrected_positions=0
+    for position in positions:
+        find=False
+        with open(labelfilename,'r',newline='\n') as f:
+            reader = csv.reader(f,delimiter='\t')
+            for row in reader:
+                if ((position>=(float(row[0])*{{ essentia_samplerate }})) and (position<=(float(row[1])*{{ essentia_samplerate }}))):
+                    find = True
+            if find:
+                corrected_positions.append(float(position))
+                corrected_amplitudes.append(float(amplitudes[indice_positions]))
+        indice_positions=indice_positions+1
+     positions = corrected_positions.copy()
+     amplitudes = corrected_amplitudes.copy()
 
 pool.add('description.peakdetect_positions', positions)
 pool.add('description.peakdetect_amplitudes', amplitudes)
