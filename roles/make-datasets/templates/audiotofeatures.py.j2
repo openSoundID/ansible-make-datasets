@@ -73,8 +73,8 @@ if labels_file.is_file():
                 corrected_positions.append(float(position))
                 corrected_amplitudes.append(float(amplitudes[indice_positions]))
         indice_positions=indice_positions+1
-     positions = corrected_positions.copy()
-     amplitudes = corrected_amplitudes.copy()
+    positions = corrected_positions.copy()
+    amplitudes = corrected_amplitudes.copy()
 
 pool.add('description.peakdetect_positions', positions)
 pool.add('description.peakdetect_amplitudes', amplitudes)
