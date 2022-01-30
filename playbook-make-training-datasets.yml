@@ -9,6 +9,7 @@
    rec_wav_directory: "{{ lookup('ini', 'ansible.rec_wav_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
    rec_json_directory: "{{ lookup('ini', 'ansible.rec_json_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
    rec_label_directory: "{{ lookup('ini', 'ansible.rec_label_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
+   rec_spectrograms_directory: "{{ lookup('ini', 'ansible.rec_spectrograms_directory type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
    inventory: "{{ lookup('ini', 'inventory.trainingInventoryFile type=properties file={{ root_dir }}/properties/opensoundid.properties') }}"
   
   roles:

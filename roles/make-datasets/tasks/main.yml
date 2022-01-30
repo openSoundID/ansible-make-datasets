@@ -18,6 +18,11 @@
     path: "{{ rec_json_directory }}"
     state: directory
 
+- name: check that spectrograms directory exist
+  file:
+    path: "{{ rec_spectrograms_directory }}"
+    state: directory
+    
 - name: Template the python file for convert wav to json
   template:
     src: audiotofeatures.py.j2
