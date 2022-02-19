@@ -13,7 +13,7 @@ outputfilename=sys.argv[2]
 
 #############################
 
-loader = MonoLoader(filename=inputfilename,sampleRate=16000,downmix='left')
+loader = MonoLoader(filename=inputfilename,sampleRate={{ essentia_samplerate }},downmix='left')
 energy = Energy()
 
 #############################
@@ -21,12 +21,11 @@ energy = Energy()
 
 audio = loader()
 energyArray= []
+if len(audio)>={{ essentia_samplerate }}:
+    for frame in FrameGenerator(audio, frameSize = {{ essentia_samplerate }}, hopSize = 512, startFromZero=True,validFrameThresholdRatio=1):
+        energyArray.append(energy(frame))
 
-for frame in FrameGenerator(audio, frameSize = {{ essentia_samplerate }}, hopSize = 512, startFromZero=True,validFrameThresholdRatio=1):
-    energyArray.append(energy(frame))
-
-min_indice=np.argmin(energyArray)
-
-writer = MonoWriter(sampleRate={{ essentia_samplerate }},filename=outputfilename)
-writer(audio[int(min_indice*512):int(min_indice*512+{{ essentia_samplerate }})])
+    min_indice=np.argmin(energyArray)
+    writer = MonoWriter(sampleRate={{ essentia_samplerate }},filename=outputfilename)
+    writer(audio[int(min_indice*512):int(min_indice*512+{{ essentia_samplerate }})])
 
